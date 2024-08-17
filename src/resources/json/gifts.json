@@ -1,0 +1,22 @@
+{
+  "guide_manifestation": {
+    "img_path": "src/resources/images/2.jpg",
+    "name": "Проявлениям",
+    "url": "https://t.me/ezo_tema/51"
+  },
+  "guide_relationship": {
+    "img_path": "src/resources/images/3.jpg",
+    "name": "Отношениям",
+    "url": "https://t.me/ezo_tema/218"
+  },
+  "guide_finance": {
+    "img_path": "src/resources/images/4.jpg",
+    "name": "Финансам",
+    "url": "https://t.me/ezo_tema/78"
+  },
+  "guide_style": {
+    "img_path": "src/resources/images/4.jpg",
+    "name": "Стилю",
+    "url": "https://t.me/ezo_tema/251"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "currency": "Р",
+  "natal_chart": {
+    "name": "🌙Натальная карта",
+    "prices": {
+      "discount": 1111,
+      "standard": 4444
+    }
+  },
+  "matrix_of_fate":{
+    "name": "✨Матрица судьбы",
+    "prices": {
+      "discount": 1111,
+      "standard": 6666
+    }
+  },
+  "full_analysis":{
+    "name": "👑Полный разбор",
+    "prices": {
+      "discount": 1111,
+      "standard": 8888
+    }
+  },
+  "style_analysis": {
+    "name": "🧝🏻‍♀️Разбор стиля",
+    "prices": {
+      "discount": 1111,
+      "standard": 5555
+    }
+  }
+}
