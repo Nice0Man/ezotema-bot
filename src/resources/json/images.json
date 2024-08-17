@@ -1,0 +1,48 @@
+{
+  "images": {
+    "photo_1": "AgACAgIAAxkBAAIBwGcLrqWs4haiC7GOtRQHlLU73reZAAJ94jEbKlRgSCw69oKlu1t_AQADAgADeQADNgQ",
+    "photo_2": "AgACAgIAAxkBAAIBw2cLrqndY6Uq4hcd72JfUzK9OE5WAAJ-4jEbKlRgSJ6lanOtna9kAQADAgADeQADNgQ",
+    "photo_3": "AgACAgIAAxkBAAIBt2cLp7dViDlassGeIai0LRKNLvCRAAJY4jEbKlRgSK6K6BdR8B3nAQADAgADeQADNgQ",
+    "photo_4": "AgACAgIAAxkBAAIByWcLrrXTKlrHgOrqKUBy8PzZ8GM2AAKA4jEbKlRgSCayz8Dq-nUFAQADAgADeQADNgQ",
+    "photo_5": "AgACAgIAAxkBAAIBzGcLrrWGZVfWaYfzhBTUpdvOsunyAAKB4jEbKlRgSDyDIdf6BR1gAQADAgADeQADNgQ",
+    "photo_6": "AgACAgIAAxkBAAIBz2cLrrXymG78Zqx3wajskfCgCvRyAAKC4jEbKlRgSI9rOAAB9-wuBAEAAwIAA3kAAzYE",
+    "photo_7": "AgACAgIAAxkBAAIB0mcLrrV1C3DoIuREgzLnGDG3YIzuAAKD4jEbKlRgSMAZbuQIontgAQADAgADeQADNgQ",
+    "photo_8": "AgACAgIAAxkBAAIBxmcLrrUjOn9IUlqsH3FxxE33oso_AAJ_4jEbKlRgSFdLQI42hkjQAQADAgADeQADNgQ",
+    "photo_9": "AgACAgIAAxkBAAIDk2cL7QehmicS2rHq0_yEnUFvOGNLAAI15TEbKlRgSH4nPH89iHt4AQADAgADeAADNgQ",
+    "photo_10": "AgACAgIAAxkBAAIDtGcL9OoMSC-ZHkrNnnmOLDk8bEAQAAKa5TEbKlRgSFgMqFEQESeyAQADAgADeQADNgQ",
+    "error": "AgACAgIAAxkBAAIFTWcMB-5Vp-YBCjz0mQHVoOGUoxbsAAIt5jEbKlRgSO3hjcuJ9PEuAQADAgADeQADNgQ",
+    "full_analysis":
+      {
+        "photo_1": "AgACAgIAAxkBAAID-GcL9cv-32NYgBth-bfnHEixn2sIAAKn5TEbKlRgSFwin1fLbhMEAQADAgADeQADNgQ",
+        "photo_2": "AgACAgIAAxkBAAID-2cL9dZRVXo90vxVXKzZ3ck10CQpAAKp5TEbKlRgSJrINO8asyjvAQADAgADeQADNgQ",
+        "photo_3": "AgACAgIAAxkBAAID_mcL9d1wIZQck3ozcVMhvEyYfXMYAAKq5TEbKlRgSP9T8tRKRIoMAQADAgADeQADNgQ"
+      },
+    "group": {
+        "photo_1": "AgACAgIAAxkBAAIB_GcLsGSBboVeanwKEEVc4HFNfPncAAKa4jEbKlRgSPAiF1g34omdAQADAgADeQADNgQ",
+        "photo_3": "AgACAgIAAxkBAAIB_WcLsGTsxUBzUk6o8VZE-a0sqzn6AAKb4jEbKlRgSNWWGx0TOIJ-AQADAgADeQADNgQ",
+        "photo_7": "AgACAgIAAxkBAAIB_2cLsGT4U_vvFsapECztV9b1q1WyAAKc4jEbKlRgSNwNgW83WnsyAQADAgADeQADNgQ",
+        "photo_9": "AgACAgIAAxkBAAICAmcLsGRi-kCCexfiLoHXXaKMNJ8ZAAKd4jEbKlRgSNoehHshE1ybAQADAgADeQADNgQ",
+        "photo_4": "AgACAgIAAxkBAAICB2cLsGTfanOO90m288RHmo4h-b2EAAKe4jEbKlRgSDWF6w9yNdBqAQADAgADeQADNgQ",
+        "photo_8": "AgACAgIAAxkBAAICCmcLsGQInefHHTmKgmsft17YZPpjAAKf4jEbKlRgSHiodKuin5EQAQADAgADeQADNgQ",
+        "photo_5": "AgACAgIAAxkBAAICDmcLsGT5pnC68qvVgycDjcHuEp_uAAKg4jEbKlRgSL0V8unkq5VvAQADAgADeQADNgQ",
+        "photo_6": "AgACAgIAAxkBAAICEWcLsGVYETMZLxWZLqarKyOauf3qAAKh4jEbKlRgSI4GpckUH3NKAQADAgADeQADNgQ",
+        "photo_2": "AgACAgIAAxkBAAICE2cLsGWzDTEos7OgFeAqbDvWBJoLAAKi4jEbKlRgSEEtZoPaKJE5AQADAgADeQADNgQ"
+    },
+    "matrix_of_fate": {
+        "photo_1": "AgACAgIAAxkBAAIB4WcLr_MbFeLn-Elc5Js6g8zs-aIZAAKO4jEbKlRgSOxcSKTT3RGmAQADAgADeQADNgQ",
+        "photo_2": "AgACAgIAAxkBAAIB4mcLr_Ni-ZJEJLNj1_ohschm-_vqAAKP4jEbKlRgSHtqeKgBocZZAQADAgADeQADNgQ",
+        "photo_3": "AgACAgIAAxkBAAIB5WcLr_MNrWIQPH97HmWImDX17666AAKQ4jEbKlRgSJQ4VqqB71BZAQADAgADeQADNgQ"
+      },
+
+    "natal_chart": {
+        "photo_1": "AgACAgIAAxkBAAIB6mcLsB3I5lQSXFuqoh9xT91MH4KOAAKS4jEbKlRgSOdVq2u9XhwvAQADAgADeQADNgQ",
+        "photo_2": "AgACAgIAAxkBAAIB62cLsB1vnN3WooDhK3gqvOE6F_OVAAKT4jEbKlRgSAiUhs9HgVyFAQADAgADeQADNgQ",
+        "photo_3": "AgACAgIAAxkBAAIB7WcLsB2quiWOQhJxtV73myf6g1OhAAKU4jEbKlRgSJyyhAAB2AgGdgEAAwIAA3kAAzYE"
+      },
+    "style_analysis": {
+        "photo_1": "AgACAgIAAxkBAAID5WcL9Y_I3C4hxtmhLci1KthayHoHAAKi5TEbKlRgSD1bKIgKcRskAQADAgADeQADNgQ",
+        "photo_3": "AgACAgIAAxkBAAID6GcL9aLpEHAO1OOG2zKi_99hRp2WAAKk5TEbKlRgSG9jYROSSQJwAQADAgADeQADNgQ",
+        "photo_2": "AgACAgIAAxkBAAID62cL9ayBmIUwkEds4xY1Jcy82OobAAKl5TEbKlRgSJpv3wZ5L5ZYAQADAgADeQADNgQ"
+    }
+  }
+}
