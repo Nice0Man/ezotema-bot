@@ -2,7 +2,6 @@ import asyncio
 import logging
 import sys
 
-import pytest
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -25,17 +24,6 @@ async def on_startup(bot: Bot) -> None:
         f"{settings.webhooks.host}{settings.webhooks.path}",
         secret_token=settings.webhooks.secret,
     )
-
-
-@typer_app.command()
-def test():
-    """Run all test from `tests` directory."""
-    print("Запуск тестов...")
-    result = pytest.main(["src/test"])
-    if result == 0:
-        print("Все тесты прошли успешно!")
-    else:
-        print("Некоторые тесты не прошли.")
 
 
 @typer_app.command()
