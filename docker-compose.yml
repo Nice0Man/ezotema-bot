@@ -1,0 +1,9 @@
+services:
+  aiogram-bot:
+    build: .
+    container_name: aiogram-bot
+    restart: always
+    command:
+      sh -c "python3 /app/run.py"
+    env_file:
+      - ./src/.env
