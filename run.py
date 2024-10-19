@@ -33,7 +33,7 @@ def start(
         help="Use webhook for receiving updates?",
     ),
 ):
-    log_filename = "course_bot.log"
+    log_filename = "logs/course_bot.log"
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",

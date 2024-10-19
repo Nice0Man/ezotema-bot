@@ -13,13 +13,19 @@ BASE_DIR = Path(__file__).parent.parent.parent
 
 load_dotenv(dotenv_path=BASE_DIR)
 
-with open("src/resources/json/gifts.json", "r", encoding="utf-8") as json_file:
+with open(
+    BASE_DIR / "src/resources/json/gifts.json", "r", encoding="utf-8"
+) as json_file:
     _gift_dict = json.load(json_file)
 
-with open("src/resources/json/price_list.json", "r", encoding="utf-8") as json_file:
+with open(
+    BASE_DIR / "src/resources/json/price_list.json", "r", encoding="utf-8"
+) as json_file:
     _price_list_dict = json.load(json_file)
 
-with open("src/resources/json/images.json", "r", encoding="utf-8") as json_file:
+with open(
+    BASE_DIR / "src/resources/json/images.json", "r", encoding="utf-8"
+) as json_file:
     _images_dict = json.load(json_file)
 
 
