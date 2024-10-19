@@ -43,6 +43,16 @@
         "photo_1": "AgACAgIAAxkBAAID5WcL9Y_I3C4hxtmhLci1KthayHoHAAKi5TEbKlRgSD1bKIgKcRskAQADAgADeQADNgQ",
         "photo_3": "AgACAgIAAxkBAAID6GcL9aLpEHAO1OOG2zKi_99hRp2WAAKk5TEbKlRgSG9jYROSSQJwAQADAgADeQADNgQ",
         "photo_2": "AgACAgIAAxkBAAID62cL9ayBmIUwkEds4xY1Jcy82OobAAKl5TEbKlRgSJpv3wZ5L5ZYAQADAgADeQADNgQ"
+    },
+    "relationship_analysis": {
+      "photo_1": "",
+      "photo_2": "",
+      "photo_3": ""
+    },
+    "one_position_analysis": {
+      "photo_1": "",
+      "photo_2": "",
+      "photo_3": ""
     }
   }
 }

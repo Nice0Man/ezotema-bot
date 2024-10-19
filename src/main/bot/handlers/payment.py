@@ -18,16 +18,22 @@ from src.main.bot.keyboards.main import (
     setup_succeeded_payment_keyboard,
 )
 from src.main.bot.middlewares.users import UserMiddleware, SetupUserEmail
+from src.main.db.schemas.users import UserBase
 from src.main.utils.payment import DATA_CATEGORIES, create_payment
-from src.main.utils.template import render_template
+from src.main.utils.template import render_template, add_image_id
 
-# Логирование успешных оплат
-log_filename = "logs/payments.log"
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler(log_filename, encoding="UTF-8")],
+EZOTEMA_ERROR_MESSAGE = (
+    "Ошибка оплаты или срок действия ссылки истек. Попробуйте снова или обратитесь к "
+    "@mary_ezotema."
 )
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+log_filename = "logs/payments.log"
+file_handler = logging.FileHandler(log_filename, encoding="UTF-8")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
 
 router = Router()
 Configuration.account_id = settings.bot.account_id
@@ -38,7 +44,7 @@ router.callback_query.middleware(SetupUserEmail())
 
 
 @router.message(F.text.in_(DATA_CATEGORIES.keys()))
-async def step_10_handler(message: Message, state: FSMContext):
+async def step_10_handler(message: Message, state: FSMContext, user: UserBase):
     """
     Отправляет предложение о разборе по специальной цене, генерирует ссылку на оплату.
     """
@@ -54,8 +60,7 @@ async def step_10_handler(message: Message, state: FSMContext):
     await message.answer_media_group(media=album_builder.build())
 
     data = await state.get_data()
-    email = data.get("email")
-    if not email:
+    if not user.email:
         await message.answer(
             text=step_10_message,
             reply_markup=await setup_prepayment_keyboard(),
@@ -63,7 +68,7 @@ async def step_10_handler(message: Message, state: FSMContext):
         )
     else:
         amount, description, payment_id, payment_url, step_10_1_message = (
-            await setup_payment(data, email, message)
+            await setup_payment(data, user.email, message)
         )
         logging.info(
             f"Создан платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
@@ -76,10 +81,12 @@ async def step_10_handler(message: Message, state: FSMContext):
 
 
 @router.callback_query(F.data == "get_email")
-async def payment_start_handler(callback: CallbackQuery, state: FSMContext):
+async def payment_start_handler(
+    callback: CallbackQuery, state: FSMContext, user: UserBase
+):
     data = await state.get_data()
     with suppress(TelegramBadRequest):
-        email = data.get("email")
+        email = user.email
         if not email:
             await state.set_state(PaymentStates.EMAIL)
             need_email_text = render_template("email.html")
@@ -107,8 +114,8 @@ async def setup_payment(data, email, message):
         "10_1_step.html", settings.bot.price_list_dict[current_category]
     )
     course_data = settings.bot.price_list_dict[current_category]
-    amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
-    # amount = 10
+    # amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
+    amount = 10
     description = f"Покупка через @ezo_tema_bot: {course_data['name']}, пользователь: @{message.from_user.username}"
     payment_url, payment_id = create_payment(
         amount=amount,
@@ -117,11 +124,6 @@ async def setup_payment(data, email, message):
         description=description,
     )
     return amount, description, payment_id, payment_url, step_10_1_message
-
-
-async def add_image_id(album_builder, image_ids):
-    for i in range(len(image_ids)):
-        album_builder.add_photo(media=image_ids[f"photo_{i + 1}"])
 
 
 @router.callback_query(F.data.startswith("check_"))
@@ -139,35 +141,59 @@ async def check_payment_callback(
             )
             await state.set_state(PaymentStates.PAYMENT_SUCCEEDED)
             succeeded_payment_text = render_template("succeeded_payment.html")
-            await callback.message.edit_media(
-                media=InputMediaPhoto(
-                    media=settings.bot.images_dict["images"]["photo_10"],
-                    caption=succeeded_payment_text,
-                ),
-                reply_markup=await setup_succeeded_payment_keyboard(),
-            )
+            if callback.message.photo:
+                await callback.message.edit_media(
+                    media=InputMediaPhoto(
+                        media=settings.bot.images_dict["images"]["photo_10"],
+                        caption=succeeded_payment_text,
+                        parse_mode="HTML",
+                    ),
+                    reply_markup=await setup_succeeded_payment_keyboard(),
+                )
+            else:
+                await callback.message.edit_text(
+                    text=succeeded_payment_text,
+                    reply_markup=await setup_succeeded_payment_keyboard(),
+                    parse_mode="HTML",
+                )
         elif payment and payment["status"] == "pending":
             payment_url = payment["confirmation"]["confirmation_url"]
-            await callback.message.edit_media(
-                media=InputMediaPhoto(
-                    media=settings.bot.images_dict["images"]["error"],
-                    caption=render_template(
-                        "check_payment.html", payment_id=payment_id
-                    ),
-                    parse_mode="HTML",
-                ),
-                reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+            check_payment_text = render_template(
+                "check_payment.html", payment_id=payment_id
             )
+            if callback.message.photo:
+                await callback.message.edit_media(
+                    media=InputMediaPhoto(
+                        media=settings.bot.images_dict["images"]["error"],
+                        caption=check_payment_text,
+                        parse_mode="HTML",
+                    ),
+                    reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+                )
+            else:
+                await callback.message.edit_text(
+                    text=check_payment_text,
+                    reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+                    parse_mode="HTML",
+                )
             logging.info(
                 f"Проверка платежа: {payment['description']} id платежа: {payment_id}",
             )
         else:
             await state.set_state(PaymentStates.PAYMENT_PASSED)
-            await callback.message.edit_media(
-                media=InputMediaPhoto(
-                    media=settings.bot.images_dict["images"]["error"],
-                    caption="Ошибка оплаты или срок действия ссылки истек. Попробуйте снова или обратитесь к "
-                    "@mary_ezotema.",
+            if callback.message.photo:
+                await callback.message.edit_media(
+                    media=InputMediaPhoto(
+                        media=settings.bot.images_dict["images"]["error"],
+                        caption=EZOTEMA_ERROR_MESSAGE,
+                        parse_mode="HTML",
+                    ),
+                )
+            else:
+                await callback.message.edit_text(
+                    text=EZOTEMA_ERROR_MESSAGE,
                     parse_mode="HTML",
-                ),
+                )
+            logging.info(
+                f"Ошибка оплаты {payment['description']} id платежа: {payment_id}"
             )

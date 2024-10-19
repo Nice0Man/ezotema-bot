@@ -27,5 +27,19 @@
       "discount": 1111,
       "standard": 5555
     }
+  },
+  "relationship_analysis": {
+    "name": "💞Отношения",
+    "prices": {
+      "discount": 1111,
+      "standard": 4444
+    }
+  },
+  "one_position_analysis": {
+    "name": "🌟Разбор одного положения",
+    "prices": {
+      "discount": 1111,
+      "standard": 2666
+    }
   }
 }

@@ -11,6 +11,8 @@ DATA_CATEGORIES: dict = {
     "✨Матрица судьбы": "matrix_of_fate",
     "👑Полный разбор": "full_analysis",
     "🧝🏻‍♀️Разбор стиля": "style_analysis",
+    "💞Отношения": "relationship_analysis",
+    "🌟Разбор одного положения": "one_position_analysis",
 }
 
 
