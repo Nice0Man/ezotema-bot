@@ -9,7 +9,7 @@ from pydantic_settings import (
     SettingsConfigDict,
 )
 
-BASE_DIR = Path(__file__).parent.parent.parent
+BASE_DIR = Path(__file__).parent.parent
 
 load_dotenv(dotenv_path=BASE_DIR)
 
@@ -76,18 +76,6 @@ class Logging(BaseSettings):
     debug: bool
 
 
-class Webhooks(BaseSettings):
-    path: str
-    secret: str
-    webapp_host: str
-    webapp_port: int
-
-
-class Webserver(BaseSettings):
-    host: str
-    port: int
-
-
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=("src/.env.template", "src/.env"),
@@ -99,8 +87,6 @@ class Settings(BaseSettings):
     bot: BotConfig
     api: APIConfig
     # logging: Logging
-    webhooks: Webhooks | None = None
-    webserver: Webserver | None = None
 
 
 settings = Settings()
