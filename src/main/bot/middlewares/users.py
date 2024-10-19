@@ -1,39 +1,87 @@
+import logging
 from typing import Callable, Dict, Any, Awaitable
 
 from aiogram import BaseMiddleware
 from aiogram.fsm.context import FSMContext
-from aiogram.types import TelegramObject, CallbackQuery
-from email_validator import validate_email, EmailNotValidError
-from sqlalchemy.ext.asyncio import AsyncSession
+from aiogram.types import TelegramObject, Message, CallbackQuery
 
 from src.main.db.crud import users as user_crud
+from src.main.db.schemas.users import UserCreate, UserUpdate
 from src.main.utils.db_helper import db_helper
 
 
-class AddUserMiddleware(BaseMiddleware):
-    def __init__(self, session: AsyncSession):
-        self.session = session
-        super().__init__()
+class UserMiddleware(BaseMiddleware):
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: Message,
+        data: Dict[str, Any],
+    ) -> None:
+        user = data.get("user")
+        if user:
+            pass
+        else:
+            user_id = event.from_user.id
+            username = event.from_user.username
+            chat_id = event.chat.id
+            email = None
+            state: FSMContext = data.get("state")
+            if state:
+                state_data = await state.get_data()
+                email = state_data.get("email")
+            async with db_helper.session_factory() as session:
+                existing_user = await user_crud.get_user_by_id(session, user_id)
+            if existing_user:
+                data["user"] = existing_user
+                logging.info(
+                    f"Пользователь найден в базе данных: "
+                    f"ID={user_id}, "
+                    f"username={existing_user.username}, "
+                    f"email={existing_user.email}"
+                )
+            else:
+                new_user = UserCreate(
+                    id=user_id, username=username, email=email, chat_id=chat_id
+                )
+                async with db_helper.session_factory() as session:
+                    await user_crud.create_user(session, new_user.dict())
+                data["user"] = new_user
+                logging.info(
+                    f"Новый пользователь добавлен: ID={user_id}, username={username}, email={email}"
+                )
+        result = await handler(event, data)
+        return result
 
+
+class SetupUserEmail(BaseMiddleware):
     async def __call__(
         self,
         handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
         event: CallbackQuery,
         data: Dict[str, Any],
     ) -> None:
-        result = await handler(event, data)
-        if event.message:
-            user_id = event.message.from_user.id
-            username = event.message.from_user.username
-            chat_id = event.message.chat.id
-            email = None
-            state: FSMContext = data.get("state")
-            if state:
-                state_data = await state.get_data()
-                email = state_data.get("email")
-            if email:
-                async with db_helper.session_factory() as session:
-                    await user_crud.add_or_update_user(
-                        session, user_id, username, email, chat_id
+        user_id = event.from_user.id
+        username = event.from_user.username
+        state: FSMContext = data.get("state")
+        async with db_helper.session_factory() as session:
+            existing_user = await user_crud.get_user_by_id(session, user_id)
+        if existing_user:
+            if existing_user.email:
+                pass
+            else:
+                if state:
+                    state_data = await state.get_data()
+                    email = state_data.get("email")
+                    user_update = UserUpdate(email=email)
+                    async with db_helper.session_factory() as session:
+                        await user_crud.update_user(
+                            session,
+                            user_id=user_id,
+                            update_data=user_update.dict(),
+                        )
+                    logging.info(
+                        f"Добавлена почта: {email} для пользователя: ID={user_id}, username={username}"
                     )
+                    data["user"] = existing_user
+        result = await handler(event, data)
         return result

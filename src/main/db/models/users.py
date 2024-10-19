@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 
 class User(Base):
-    id: Mapped[str] = mapped_column(String(255), primary_key=True, nullable=False)
-    username: Mapped[str] = mapped_column(String(128))
+    id: Mapped[int] = mapped_column(String(255), primary_key=True, nullable=False)
+    username: Mapped[str | None] = mapped_column(String(128))
     email: Mapped[str | None] = mapped_column(String(128))
-    chat_id: Mapped[int]
+    chat_id: Mapped[int | None]

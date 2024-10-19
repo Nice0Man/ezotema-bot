@@ -12,12 +12,12 @@ class UserBase(BaseModel):
 
 # Schema for creating a new user
 class UserCreate(UserBase):
-    id: str = Field(..., example="1")
+    id: int = Field(..., example=1)
 
 
 # Schema for reading user data
 class UserRead(UserBase):
-    id: str
+    id: int
 
 
 # Schema for updating user data
