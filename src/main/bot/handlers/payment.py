@@ -5,9 +5,11 @@ from contextlib import suppress
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
+from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery, InputMediaPhoto
 from aiogram.utils.media_group import MediaGroupBuilder
+from email_validator import validate_email
 from yookassa import Payment, Configuration
 
 from src.config import settings
@@ -19,7 +21,7 @@ from src.main.bot.keyboards.main import (
 )
 from src.main.bot.middlewares.users import UserMiddleware, SetupUserEmail
 from src.main.db.schemas.users import UserBase
-from src.main.utils.payment import DATA_CATEGORIES, create_payment
+from src.main.utils.payment import DATA_CATEGORIES, create_payment, check_payment
 from src.main.utils.template import render_template, add_image_id
 
 EZOTEMA_ERROR_MESSAGE = (
@@ -80,6 +82,47 @@ async def step_10_handler(message: Message, state: FSMContext, user: UserBase):
         )
 
 
+@router.message(
+    F.text.cast(validate_email).normalized.as_("email"),
+    StateFilter(PaymentStates.EMAIL),
+)
+async def get_email_handler(
+    message: Message,
+    state: FSMContext,
+    email: str,
+):
+    await state.set_state(PaymentStates.PAYMENT_PENDING)
+    await state.update_data(email=email)
+    data = await state.get_data()
+    with suppress(TelegramBadRequest):
+        amount, description, payment_id, payment_url, step_10_1_message = (
+            await setup_payment(data, email, message)
+        )
+        await message.answer_photo(
+            photo=settings.bot.images_dict["images"]["photo_9"],
+            caption=step_10_1_message,
+            reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+            parse_mode="HTML",
+        )
+        payment = await check_payment(payment_id, 60, state)
+        if payment["status"] != "succeeded":
+            passed_payment_text = render_template("passed_payment_text.html")
+            payment_url, payment_id = create_payment(
+                amount=amount,
+                chat_id=message.chat.id,
+                email=email,
+                description=description,
+            )
+            logging.info(
+                f"Создан повторный платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
+            )
+            await message.answer(
+                text=passed_payment_text,
+                parse_mode="HTML",
+                reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+            )
+
+
 @router.callback_query(F.data == "get_email")
 async def payment_start_handler(
     callback: CallbackQuery, state: FSMContext, user: UserBase
@@ -115,7 +158,7 @@ async def setup_payment(data, email, message):
     )
     course_data = settings.bot.price_list_dict[current_category]
     # amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
-    amount = 10
+    amount = 10  # TEST PRICE
     description = f"Покупка через @ezo_tema_bot: {course_data['name']}, пользователь: @{message.from_user.username}"
     payment_url, payment_id = create_payment(
         amount=amount,

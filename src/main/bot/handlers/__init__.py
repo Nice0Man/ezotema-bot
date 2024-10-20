@@ -6,6 +6,7 @@ def setup(dp: Dispatcher):
     Registers callback-query handlers
     :param dp: A `Dispatcher` instance
     """
+    from .commands import router as commands_router
     from .step_1 import router as step_1_router
     from .step_2 import router as step_2_router
     from .step_3 import router as step_3_router
@@ -17,6 +18,7 @@ def setup(dp: Dispatcher):
     from .step_9 import router as step_9_router
     from .payment import router as payment_router
 
+    dp.include_router(commands_router)
     dp.include_router(step_1_router)
     dp.include_router(step_2_router)
     dp.include_router(step_3_router)

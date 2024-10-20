@@ -32,14 +32,28 @@
     "name": "💞Отношения (ПОЛНЫЙ гайд)",
     "prices": {
       "discount": 1111,
-      "standard": 4444
+      "standard": 2101
     }
   },
   "one_position_analysis": {
     "name": "🌟Разбор одного положения",
     "prices": {
       "discount": 1111,
-      "standard": 2666
+      "standard": 3111
+    }
+  },
+  "children_matrix": {
+    "name": "🐱Детская матрица",
+    "prices": {
+      "discount": 1111,
+      "standard": 6666
+    }
+  },
+  "compatibility": {
+    "name": "💍Совместимость",
+    "prices": {
+      "discount": 1111,
+      "standard": 4444
     }
   }
 }

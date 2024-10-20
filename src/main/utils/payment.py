@@ -13,6 +13,8 @@ DATA_CATEGORIES: dict = {
     "🧝🏻‍♀️Разбор стиля": "style_analysis",
     "💞Отношения (ПОЛНЫЙ гайд)": "relationship_analysis",
     "🌟Разбор одного положения": "one_position_analysis",
+    "🐱Детская матрица": "children_matrix",
+    "💍Совместимость": "compatibility",
 }
 
 

@@ -9,6 +9,7 @@ env = Environment(
         package_name="src.main", package_path="../resources/templates"
     ),
     autoescape=select_autoescape(["html"]),
+    cache_size=50,
 )
 
 
@@ -22,7 +23,6 @@ def render_template(_filename: str, values: Optional[Dict[str, Any]] = None, **k
     """
 
     template = env.get_template(_filename)
-
     if values:
         rendered_template = template.render(values, **kwargs)
     else:

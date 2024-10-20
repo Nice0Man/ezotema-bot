@@ -107,6 +107,10 @@ async def setup_reply_session_keyboard() -> ReplyKeyboardMarkup:
         ],
         [KeyboardButton(text="💞Отношения (ПОЛНЫЙ гайд)")],
         [KeyboardButton(text="🌟Разбор одного положения")],
+        [
+            KeyboardButton(text="🐱Детская матрица"),
+            KeyboardButton(text="💍Совместимость"),
+        ],
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=keyboard_buttons, resize_keyboard=True)
     return keyboard
