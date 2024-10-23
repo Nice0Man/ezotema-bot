@@ -24,3 +24,16 @@ router = Router()
 # )
 # async def get_email_handler(message: Message):
 #     await message.answer(f"Your email is {message.text}")
+
+
+# Пример использования декоратора
+# @exponential_backoff(max_retries=5, base_delay=1, max_delay=32)
+# def make_request():
+#     # Здесь выполняется ваш код, который может вызвать ошибку
+#     print("Попытка выполнения запроса...")
+#     # Искусственно вызываем ошибку для демонстрации
+#     raise Exception("Ошибка соединения")
+#
+#
+# # Вызов функции
+# make_request()

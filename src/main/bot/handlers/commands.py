@@ -13,7 +13,7 @@ router = Router()
 @router.message(Command("analyse"))
 async def analyse_command_handler(message: Message):
     await message.answer(
-        text="⭐ Список разборов предоставлен по вашему запросу! ⭐",
+        text="⭐ Жми на кнопочку и выбирай! ⭐",
         reply_markup=await setup_reply_session_keyboard(),
     )
 

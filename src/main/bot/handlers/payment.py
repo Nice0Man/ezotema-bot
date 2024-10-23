@@ -157,8 +157,8 @@ async def setup_payment(data, email, message):
         "10_1_step.html", settings.bot.price_list_dict[current_category]
     )
     course_data = settings.bot.price_list_dict[current_category]
-    # amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
-    amount = 10  # TEST PRICE
+    amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
+    # amount = 10  # TEST PRICE
     description = f"Покупка через @ezo_tema_bot: {course_data['name']}, пользователь: @{message.from_user.username}"
     payment_url, payment_id = create_payment(
         amount=amount,
