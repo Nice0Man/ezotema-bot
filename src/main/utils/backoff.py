@@ -24,7 +24,7 @@ def exponential_backoff(max_retries=5, base_delay=1, max_delay=32):
                     # Обработка ошибки
                     print(f"Ошибка: {e}")
                     # Вычисляем время ожидания
-                    delay = min(max_delay, base_delay * (2 ** retries))
+                    delay = min(max_delay, base_delay * (2**retries))
                     # Добавляем случайный разброс
                     delay = delay + random.uniform(0, 1)
                     print(f"Ожидание {delay:.2f} секунд перед повторной попыткой...")
