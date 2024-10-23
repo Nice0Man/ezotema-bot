@@ -30,10 +30,10 @@ async def on_startup(bot: Bot) -> None:
 
 @typer_app.command()
 def start(
-        use_webhook: bool = Option(
-            default=False,
-            help="Use webhook for receiving updates?",
-        ),
+    use_webhook: bool = Option(
+        default=False,
+        help="Use webhook for receiving updates?",
+    ),
 ):
     log_filename = "logs/course_bot.log"
     logging.basicConfig(
