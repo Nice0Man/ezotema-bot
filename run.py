@@ -11,10 +11,12 @@ from typer import Typer, Option
 
 from src.config import settings
 from src.main.bot.app import get_dp
+from src.main.utils.backoff import exponential_backoff
 
 typer_app = Typer()
 
 
+@exponential_backoff(max_retries=5, base_delay=1, max_delay=32)
 async def run_polling(dp: Dispatcher, bot: Bot) -> None:
     await dp.start_polling(bot)
 
@@ -28,10 +30,10 @@ async def on_startup(bot: Bot) -> None:
 
 @typer_app.command()
 def start(
-    use_webhook: bool = Option(
-        default=False,
-        help="Use webhook for receiving updates?",
-    ),
+        use_webhook: bool = Option(
+            default=False,
+            help="Use webhook for receiving updates?",
+        ),
 ):
     log_filename = "logs/course_bot.log"
     logging.basicConfig(
