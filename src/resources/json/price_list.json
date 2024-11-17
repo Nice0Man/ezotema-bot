@@ -55,5 +55,12 @@
       "discount": 1111,
       "standard": 4444
     }
+  },
+  "women_s_club": {
+    "name": "Подписка на Women's club EZOWOMAN",
+    "prices": {
+      "discount": 333,
+      "standard": 888
+    }
   }
 }

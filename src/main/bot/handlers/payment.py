@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 from contextlib import suppress
+from typing import Tuple, Dict, Any
 
 from aiogram import Router, F
 from aiogram.exceptions import TelegramBadRequest
@@ -21,22 +22,32 @@ from src.main.bot.keyboards.main import (
 )
 from src.main.bot.middlewares.users import UserMiddleware, SetupUserEmail
 from src.main.db.schemas.users import UserBase
-from src.main.utils.payment import DATA_CATEGORIES, create_payment, check_payment
+from src.main.utils.payment import DATA_CATEGORIES, create_payment
 from src.main.utils.template import render_template, add_image_id
 
+# Constants
 EZOTEMA_ERROR_MESSAGE = (
     "Ошибка оплаты или срок действия ссылки истек. Попробуйте снова или обратитесь к "
     "@mary_ezotema."
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-log_filename = "logs/payments.log"
-file_handler = logging.FileHandler(log_filename, encoding="UTF-8")
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
 
+# Logger setup
+def setup_logger() -> logging.Logger:
+    logger_ = logging.getLogger(__name__)
+    logger_.setLevel(logging.INFO)
+    file_handler = logging.FileHandler("logs/payments.log", encoding="UTF-8")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    file_handler.setFormatter(formatter)
+    logger_.addHandler(file_handler)
+    return logger_
+
+
+logger = setup_logger()
+
+# Router setup
 router = Router()
 Configuration.account_id = settings.bot.account_id
 Configuration.secret_key = settings.bot.payments_token
@@ -47,80 +58,75 @@ router.callback_query.middleware(SetupUserEmail())
 
 @router.message(F.text.in_(DATA_CATEGORIES.keys()))
 async def step_10_handler(message: Message, state: FSMContext, user: UserBase):
-    """
-    Отправляет предложение о разборе по специальной цене, генерирует ссылку на оплату.
-    """
     await state.set_state(PaymentStates.PAYMENT_START)
     await state.update_data(current_service=message.text)
     current_category = DATA_CATEGORIES[message.text]
-    step_10_message = render_template(
-        "10_step.html", settings.bot.price_list_dict[current_category]
-    )
-    image_ids: dict = settings.bot.images_dict["images"][current_category]
+    await send_media_group(message, current_category)
+    await handle_payment_offer(message, state, user)
+
+
+async def send_media_group(message: Message, category: str):
+    image_ids: dict = settings.bot.images_dict["images"][category]
     album_builder = MediaGroupBuilder()
     await add_image_id(album_builder, image_ids)
     await message.answer_media_group(media=album_builder.build())
 
+
+async def handle_payment_offer(message: Message, state: FSMContext, user: UserBase):
     data = await state.get_data()
     if not user.email:
         await message.answer(
-            text=step_10_message,
+            text=render_template(
+                "10_step.html", settings.bot.price_list_dict[data["current_service"]]
+            ),
             reply_markup=await setup_prepayment_keyboard(),
             parse_mode="HTML",
         )
     else:
-        amount, description, payment_id, payment_url, step_10_1_message = (
-            await setup_payment(data, user.email, message)
-        )
-        logging.info(
-            f"Создан платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
-        )
-        await message.answer(
-            text=step_10_1_message,
-            reply_markup=await setup_payment_keyboard(payment_url, payment_id),
-            parse_mode="HTML",
-        )
+        if message.text == DATA_CATEGORIES.get("👸Women's Club"):
+            await process_membership_payment(message, state, user.email)
+        else:
+            await process_payment(message, state, user.email)
+
+
+async def process_membership_payment(message: Message, state: FSMContext, email: str):
+    data = await state.get_data()
+    amount, description, payment_id, payment_url, step_10_1_message = (
+        await setup_payment(data, email, message)
+    )
+    logger.info(
+        f"Создан платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
+    )
+    await message.answer(
+        text=step_10_1_message,
+        reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+        parse_mode="HTML",
+    )
+
+
+async def process_payment(message: Message, state: FSMContext, email: str):
+    data = await state.get_data()
+    amount, description, payment_id, payment_url, step_10_1_message = (
+        await setup_payment(data, email, message)
+    )
+    logger.info(
+        f"Создан платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
+    )
+    await message.answer(
+        text=step_10_1_message,
+        reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+        parse_mode="HTML",
+    )
 
 
 @router.message(
     F.text.cast(validate_email).normalized.as_("email"),
     StateFilter(PaymentStates.EMAIL),
 )
-async def get_email_handler(
-    message: Message,
-    state: FSMContext,
-    email: str,
-):
+async def get_email_handler(message: Message, state: FSMContext, email: str):
     await state.set_state(PaymentStates.PAYMENT_PENDING)
     await state.update_data(email=email)
-    data = await state.get_data()
-    with suppress(TelegramBadRequest):
-        amount, description, payment_id, payment_url, step_10_1_message = (
-            await setup_payment(data, email, message)
-        )
-        await message.answer_photo(
-            photo=settings.bot.images_dict["images"]["photo_9"],
-            caption=step_10_1_message,
-            reply_markup=await setup_payment_keyboard(payment_url, payment_id),
-            parse_mode="HTML",
-        )
-        payment = await check_payment(payment_id, 60, state)
-        if payment["status"] != "succeeded":
-            passed_payment_text = render_template("passed_payment_text.html")
-            payment_url, payment_id = create_payment(
-                amount=amount,
-                chat_id=message.chat.id,
-                email=email,
-                description=description,
-            )
-            logging.info(
-                f"Создан повторный платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
-            )
-            await message.answer(
-                text=passed_payment_text,
-                parse_mode="HTML",
-                reply_markup=await setup_payment_keyboard(payment_url, payment_id),
-            )
+    await process_payment(message, state, email)
 
 
 @router.callback_query(F.data == "get_email")
@@ -131,34 +137,29 @@ async def payment_start_handler(
     with suppress(TelegramBadRequest):
         email = user.email
         if not email:
-            await state.set_state(PaymentStates.EMAIL)
-            need_email_text = render_template("email.html")
-            await callback.message.edit_text(
-                text=need_email_text,
-                parse_mode="HTML",
-            )
+            await request_email(callback, state)
         else:
-            amount, description, payment_id, payment_url, step_10_1_message = (
-                await setup_payment(data, email, callback.message)
-            )
-            logging.info(
-                f"Создан платеж: {payment_id}, пользователь: {callback.from_user.username}, сумма: {amount}"
-            )
-            await callback.message.edit_text(
-                text=step_10_1_message,
-                reply_markup=await setup_payment_keyboard(payment_url, payment_id),
-                parse_mode="HTML",
-            )
+            await process_payment(callback.message, state, email)
 
 
-async def setup_payment(data, email, message):
+async def request_email(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(PaymentStates.EMAIL)
+    need_email_text = render_template("email.html")
+    await callback.message.edit_text(
+        text=need_email_text,
+        parse_mode="HTML",
+    )
+
+
+async def setup_payment(
+    data: Dict[str, Any], email: str, message: Message
+) -> Tuple[int, str, str, str, str]:
     current_category = DATA_CATEGORIES[data["current_service"]]
     step_10_1_message = render_template(
         "10_1_step.html", settings.bot.price_list_dict[current_category]
     )
     course_data = settings.bot.price_list_dict[current_category]
     amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
-    # amount = 10  # TEST PRICE
     description = f"Покупка через @ezo_tema_bot: {course_data['name']}, пользователь: @{message.from_user.username}"
     payment_url, payment_id = create_payment(
         amount=amount,
@@ -170,73 +171,74 @@ async def setup_payment(data, email, message):
 
 
 @router.callback_query(F.data.startswith("check_"))
-async def check_payment_callback(
-    callback: CallbackQuery,
-    state: FSMContext,
-):
+async def check_payment_callback(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     payment_id = callback.data.split("_")[-1]
     payment = json.loads((Payment.find_one(payment_id)).json())
     with suppress(TelegramBadRequest):
         if payment and payment["status"] == "succeeded":
-            logging.info(
-                f"Оплата успешна: {payment['description']} Время: {datetime.datetime.now()}"
-            )
-            await state.set_state(PaymentStates.PAYMENT_SUCCEEDED)
-            succeeded_payment_text = render_template("succeeded_payment.html")
-            if callback.message.photo:
-                await callback.message.edit_media(
-                    media=InputMediaPhoto(
-                        media=settings.bot.images_dict["images"]["photo_10"],
-                        caption=succeeded_payment_text,
-                        parse_mode="HTML",
-                    ),
-                    reply_markup=await setup_succeeded_payment_keyboard(),
-                )
-            else:
-                await callback.message.edit_text(
-                    text=succeeded_payment_text,
-                    reply_markup=await setup_succeeded_payment_keyboard(),
-                    parse_mode="HTML",
-                )
+            await handle_successful_payment(callback, state, payment)
         elif payment and payment["status"] == "pending":
-            payment_url = payment["confirmation"]["confirmation_url"]
-            check_payment_text = render_template(
-                "check_payment.html", payment_id=payment_id
-            )
-            if callback.message.photo:
-                await callback.message.edit_media(
-                    media=InputMediaPhoto(
-                        media=settings.bot.images_dict["images"]["error"],
-                        caption=check_payment_text,
-                        parse_mode="HTML",
-                    ),
-                    reply_markup=await setup_payment_keyboard(payment_url, payment_id),
-                )
-            else:
-                await callback.message.edit_text(
-                    text=check_payment_text,
-                    reply_markup=await setup_payment_keyboard(payment_url, payment_id),
-                    parse_mode="HTML",
-                )
-            logging.info(
-                f"Проверка платежа: {payment['description']} id платежа: {payment_id}",
-            )
+            await handle_pending_payment(callback, payment_id, payment)
         else:
-            await state.set_state(PaymentStates.PAYMENT_PASSED)
-            if callback.message.photo:
-                await callback.message.edit_media(
-                    media=InputMediaPhoto(
-                        media=settings.bot.images_dict["images"]["error"],
-                        caption=EZOTEMA_ERROR_MESSAGE,
-                        parse_mode="HTML",
-                    ),
-                )
-            else:
-                await callback.message.edit_text(
-                    text=EZOTEMA_ERROR_MESSAGE,
-                    parse_mode="HTML",
-                )
-            logging.info(
-                f"Ошибка оплаты {payment['description']} id платежа: {payment_id}"
-            )
+            await handle_failed_payment(callback, state, payment_id)
+
+
+async def handle_successful_payment(
+    callback: CallbackQuery, state: FSMContext, payment: Dict[str, Any]
+):
+    logger.info(
+        f"Оплата успешна: {payment['description']} Время: {datetime.datetime.now()}"
+    )
+    await state.set_state(PaymentStates.PAYMENT_SUCCEEDED)
+    succeeded_payment_text = render_template("succeeded_payment.html")
+    await edit_message_with_media(
+        callback,
+        succeeded_payment_text,
+        "photo_10",
+        await setup_succeeded_payment_keyboard(),
+    )
+
+
+async def handle_pending_payment(
+    callback: CallbackQuery, payment_id: str, payment: Dict[str, Any]
+):
+    payment_url = payment["confirmation"]["confirmation_url"]
+    check_payment_text = render_template("check_payment.html", payment_id=payment_id)
+    await edit_message_with_media(
+        callback,
+        check_payment_text,
+        "error",
+        await setup_payment_keyboard(payment_url, payment_id),
+    )
+    logger.info(
+        f"Проверка платежа: {payment['description']} id платежа: {payment_id}",
+    )
+
+
+async def handle_failed_payment(
+    callback: CallbackQuery, state: FSMContext, payment_id: str
+):
+    await state.set_state(PaymentStates.PAYMENT_PASSED)
+    await edit_message_with_media(callback, EZOTEMA_ERROR_MESSAGE, "error", None)
+    logger.info(f"Ошибка оплаты id платежа: {payment_id}")
+
+
+async def edit_message_with_media(
+    callback: CallbackQuery, text: str, image_key: str, reply_markup: Any
+):
+    if callback.message.photo:
+        await callback.message.edit_media(
+            media=InputMediaPhoto(
+                media=settings.bot.images_dict["images"][image_key],
+                caption=text,
+                parse_mode="HTML",
+            ),
+            reply_markup=reply_markup,
+        )
+    else:
+        await callback.message.edit_text(
+            text=text,
+            reply_markup=reply_markup,
+            parse_mode="HTML",
+        )

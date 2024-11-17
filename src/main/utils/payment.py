@@ -7,6 +7,7 @@ from yookassa import Payment
 from src.main.bot.fsm.payment_states import PaymentStates
 
 DATA_CATEGORIES: dict = {
+    "👸Women's Club": "women_s_club",
     "🌙Натальная карта": "natal_chart",
     "✨Матрица судьбы": "matrix_of_fate",
     "👑Полный разбор": "full_analysis",

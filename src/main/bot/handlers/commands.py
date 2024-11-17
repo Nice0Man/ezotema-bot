@@ -4,7 +4,9 @@ from aiogram.types import Message
 from aiogram.utils.media_group import MediaGroupBuilder
 
 from src.config import settings
-from src.main.bot.keyboards.main import setup_reply_session_keyboard
+from src.main.bot.keyboards.main import (
+    setup_reply_session_keyboard,
+)
 from src.main.utils.template import add_image_id
 
 router = Router()

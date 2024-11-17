@@ -1,13 +1,12 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, FSInputFile, CallbackQuery
-from aiogram.utils.media_group import MediaGroupBuilder
+from aiogram.types import Message, CallbackQuery
 
 from src.config import settings
+from src.main.bot.fsm.course_states import CourseStates
 from src.main.bot.keyboards.main import setup_start_keyboard
 from src.main.utils.template import render_template
-from src.main.bot.fsm.course_states import CourseStates
 
 router = Router()
 

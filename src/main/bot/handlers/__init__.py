@@ -30,6 +30,6 @@ def setup(dp: Dispatcher):
     dp.include_router(step_9_router)
     dp.include_router(payment_router)
 
-    # from .test import router as test_router
-    #
-    # dp.include_router(test_router)
+    from .test import router as test_router
+
+    dp.include_router(test_router)

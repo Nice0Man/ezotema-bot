@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery, FSInputFile
 
 from src.config import settings
 from src.main.bot.fsm.course_states import CourseStates
-from src.main.bot.keyboards.main import setup_subscription_keyboard
+from src.main.bot.keyboards.main import setup_channel_subscription_keyboard
 from src.main.utils.template import render_template
 
 router = Router()
@@ -23,7 +23,7 @@ async def step_3_handler(callback: CallbackQuery, state: FSMContext):
     await callback.message.answer_photo(
         photo=settings.bot.images_dict["images"]["photo_3"],
         caption=step_3_message,
-        reply_markup=await setup_subscription_keyboard(
+        reply_markup=await setup_channel_subscription_keyboard(
             callback.data
         ),  # Кнопка для перехода на канал
     )

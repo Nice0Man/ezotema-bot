@@ -1,6 +1,5 @@
 from aiogram.types import (
     InlineKeyboardMarkup,
-    InlineKeyboardButton,
     KeyboardButton,
     ReplyKeyboardMarkup,
 )
@@ -31,9 +30,12 @@ async def setup_topic_keyboard() -> InlineKeyboardMarkup:
 
 
 # Клавиатура для 3-го шага (подписка на канал)
-async def setup_subscription_keyboard(prev_callback_name: str) -> InlineKeyboardMarkup:
+async def setup_channel_subscription_keyboard(
+    prev_callback_name: str,
+) -> InlineKeyboardMarkup:
     """
     Клавиатура для проверки подписки на телеграм-канал.
+
     """
     builder = InlineKeyboardBuilder()
     builder.button(
@@ -97,6 +99,7 @@ async def setup_reply_session_keyboard() -> ReplyKeyboardMarkup:
     Создание основной клавиатуры бота (ReplyKeyboardMarkup).
     """
     keyboard_buttons = [
+        [KeyboardButton(text="👸Women's Club")],
         [
             KeyboardButton(text="🌙Натальная карта"),
             KeyboardButton(text="✨Матрица судьбы"),
