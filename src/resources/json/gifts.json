@@ -1,22 +1,27 @@
 {
   "guide_manifestation": {
     "img_path": "src/resources/images/2.jpg",
-    "name": "Проявлениям",
-    "url": "https://t.me/ezo_tema/51"
+    "name": "Проявлению",
+    "url": "https://disk.yandex.ru/i/-4BjFgleMyTczA"
   },
   "guide_relationship": {
     "img_path": "src/resources/images/3.jpg",
     "name": "Отношениям",
-    "url": "https://t.me/ezo_tema/218"
+    "url": "https://disk.yandex.ru/i/tnZV1WWEM-v2lQ"
   },
   "guide_finance": {
     "img_path": "src/resources/images/4.jpg",
     "name": "Финансам",
-    "url": "https://t.me/ezo_tema/78"
+    "url": "https://disk.yandex.ru/i/CQB2S3rnTvU_Rw"
   },
   "guide_style": {
     "img_path": "src/resources/images/4.jpg",
     "name": "Стилю",
-    "url": "https://t.me/ezo_tema/251"
+    "url": "https://disk.yandex.ru/i/5vlIp7wJ5AMDOA"
+  },
+  "guide_astropsychology":{
+    "img_path": "src/resources/images/4.jpg",
+    "name": "Твоим Сильным Сторонам",
+    "url": "https://disk.yandex.ru/i/lnxyZWfNbDd9ig"
   }
 }
