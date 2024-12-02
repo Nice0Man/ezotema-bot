@@ -7,7 +7,7 @@ from src.config import settings
 from src.main.bot.keyboards.main import (
     setup_reply_session_keyboard,
 )
-from src.main.utils.template import add_image_id
+from src.main.utils.template import add_image_id, render_template
 
 router = Router()
 
@@ -26,3 +26,9 @@ async def analyse_command_handler(message: Message):
     album_builder = MediaGroupBuilder(caption="Скорее ознакомься с отзывами! ❤️")
     await add_image_id(album_builder, image_ids)
     await message.answer_media_group(media=album_builder.build())
+
+
+@router.message(Command("offer"))
+async def offer_command_handler(message: Message):
+    offer_message = render_template("offer.html")
+    await message.answer(text=offer_message, parse_mode="HTML")

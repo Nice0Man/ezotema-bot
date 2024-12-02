@@ -44,7 +44,15 @@ async def step_4_handler(callback: CallbackQuery, state: FSMContext):
         )
 
 
-@router.callback_query(F.data.startswith("guide_"))
+@router.callback_query(F.data.startswith("guide_"), StateFilter(CourseStates.STEP_3))
+async def step_4_handler_other_buttons_not_subscribed(callback: CallbackQuery):
+    """
+    Отправляет ссылку на гайд после подтверждения подписки.
+    """
+    await callback.answer("Необходимо проверить подписку на канал, секундочку... ⌛")
+
+
+@router.callback_query(F.data.startswith("guide_"), StateFilter(CourseStates.STEP_4))
 async def step_4_handler_other_buttons(callback: CallbackQuery):
     """
     Отправляет ссылку на гайд после подтверждения подписки.

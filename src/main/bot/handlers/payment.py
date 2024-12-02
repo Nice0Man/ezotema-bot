@@ -16,20 +16,20 @@ from yookassa import Payment, Configuration
 from src.config import settings
 from src.main.bot.fsm.payment_states import PaymentStates
 from src.main.bot.keyboards.main import (
-    setup_payment_keyboard,
+    setup_base_payment_keyboard,
     setup_prepayment_keyboard,
     setup_succeeded_payment_keyboard,
+    setup_membership_payment_keyboard,
 )
 from src.main.bot.middlewares.users import UserMiddleware, SetupUserEmail
 from src.main.db.schemas.users import UserBase
-from src.main.utils.payment import DATA_CATEGORIES, create_payment
-from src.main.utils.template import render_template, add_image_id
-
-# Constants
-EZOTEMA_ERROR_MESSAGE = (
-    "Ошибка оплаты или срок действия ссылки истек. Попробуйте снова или обратитесь к "
-    "@mary_ezotema."
+from src.main.utils.payment import (
+    DATA_CATEGORIES,
+    create_payment,
+    WOMEN_S_CLUB,
+    EZOTEMA_ERROR_MESSAGE,
 )
+from src.main.utils.template import render_template, add_image_id
 
 
 # Logger setup
@@ -83,38 +83,59 @@ async def handle_payment_offer(message: Message, state: FSMContext, user: UserBa
             parse_mode="HTML",
         )
     else:
-        if message.text == DATA_CATEGORIES.get("👸Women's Club"):
+        if message.text == WOMEN_S_CLUB:
             await process_membership_payment(message, state, user.email)
         else:
-            await process_payment(message, state, user.email)
+            await process_base_payment(message, state, user.email)
 
 
 async def process_membership_payment(message: Message, state: FSMContext, email: str):
     data = await state.get_data()
-    amount, description, payment_id, payment_url, step_10_1_message = (
-        await setup_payment(data, email, message)
+    current_category = DATA_CATEGORIES[data["current_service"]]
+    membership_subscription_message = render_template(
+        "membership_subscription.html", settings.bot.price_list_dict[current_category]
+    )
+    course_data = settings.bot.price_list_dict[current_category]
+    # amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
+    amount = 5
+    description = f"Покупка через @ezo_tema_bot: {course_data['name']}, пользователь: @{message.from_user.username}"
+    payment_id, payment_token = await setup_payment(
+        amount=amount,
+        chat_id=message.chat.id,
+        email=email,
+        description=description,
     )
     logger.info(
         f"Создан платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
     )
     await message.answer(
-        text=step_10_1_message,
-        reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+        text=membership_subscription_message,
+        reply_markup=await setup_membership_payment_keyboard(payment_id),
         parse_mode="HTML",
     )
 
 
-async def process_payment(message: Message, state: FSMContext, email: str):
+async def process_base_payment(message: Message, state: FSMContext, email: str):
     data = await state.get_data()
-    amount, description, payment_id, payment_url, step_10_1_message = (
-        await setup_payment(data, email, message)
+    current_category = DATA_CATEGORIES[data["current_service"]]
+    step_10_1_message = render_template(
+        "10_1_step.html", settings.bot.price_list_dict[current_category]
+    )
+    course_data = settings.bot.price_list_dict[current_category]
+    amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
+    description = f"Покупка через @ezo_tema_bot: {course_data['name']}, пользователь: @{message.from_user.username}"
+    payment_id, payment_url = await setup_payment(
+        amount=amount,
+        chat_id=message.chat.id,
+        email=email,
+        description=description,
     )
     logger.info(
         f"Создан платеж: {payment_id}, пользователь: {message.from_user.username}, сумма: {amount}"
     )
     await message.answer(
         text=step_10_1_message,
-        reply_markup=await setup_payment_keyboard(payment_url, payment_id),
+        reply_markup=await setup_base_payment_keyboard(payment_url, payment_id),
         parse_mode="HTML",
     )
 
@@ -126,20 +147,19 @@ async def process_payment(message: Message, state: FSMContext, email: str):
 async def get_email_handler(message: Message, state: FSMContext, email: str):
     await state.set_state(PaymentStates.PAYMENT_PENDING)
     await state.update_data(email=email)
-    await process_payment(message, state, email)
+    await process_base_payment(message, state, email)
 
 
 @router.callback_query(F.data == "get_email")
 async def payment_start_handler(
     callback: CallbackQuery, state: FSMContext, user: UserBase
 ):
-    data = await state.get_data()
     with suppress(TelegramBadRequest):
         email = user.email
         if not email:
             await request_email(callback, state)
         else:
-            await process_payment(callback.message, state, email)
+            await process_base_payment(callback.message, state, email)
 
 
 async def request_email(callback: CallbackQuery, state: FSMContext):
@@ -152,22 +172,33 @@ async def request_email(callback: CallbackQuery, state: FSMContext):
 
 
 async def setup_payment(
-    data: Dict[str, Any], email: str, message: Message
-) -> Tuple[int, str, str, str, str]:
-    current_category = DATA_CATEGORIES[data["current_service"]]
-    step_10_1_message = render_template(
-        "10_1_step.html", settings.bot.price_list_dict[current_category]
-    )
-    course_data = settings.bot.price_list_dict[current_category]
-    amount = course_data["prices"]["standard"] - course_data["prices"]["discount"]
-    description = f"Покупка через @ezo_tema_bot: {course_data['name']}, пользователь: @{message.from_user.username}"
-    payment_url, payment_id = create_payment(
+    amount: int,
+    chat_id: str,
+    email: str,
+    description: str,
+    save_payment_method: bool = False,
+) -> Tuple[str, str]:
+    """
+    Sets up a payment and returns the payment URL and ID.
+
+    :param save_payment_method:
+    :param amount: The amount for the payment
+    :param chat_id: The chat ID associated with the payment
+    :param email: The email of the user making the payment
+    :param description: The description of the payment
+    :return: A tuple containing the payment URL and payment ID
+    """
+    payment = create_payment(
         amount=amount,
-        chat_id=message.chat.id,
+        chat_id=chat_id,
         email=email,
         description=description,
+        save_payment_method=save_payment_method,
     )
-    return amount, description, payment_id, payment_url, step_10_1_message
+    if not save_payment_method:
+        return payment.id, payment.confirmation.confirmation_url
+    else:
+        return payment.id, payment.confirmation.confirmation_token
 
 
 @router.callback_query(F.data.startswith("check_"))
@@ -176,6 +207,7 @@ async def check_payment_callback(callback: CallbackQuery, state: FSMContext):
     payment_id = callback.data.split("_")[-1]
     payment = json.loads((Payment.find_one(payment_id)).json())
     with suppress(TelegramBadRequest):
+        print(payment)
         if payment and payment["status"] == "succeeded":
             await handle_successful_payment(callback, state, payment)
         elif payment and payment["status"] == "pending":
@@ -209,7 +241,7 @@ async def handle_pending_payment(
         callback,
         check_payment_text,
         "error",
-        await setup_payment_keyboard(payment_url, payment_id),
+        await setup_base_payment_keyboard(payment_url, payment_id),
     )
     logger.info(
         f"Проверка платежа: {payment['description']} id платежа: {payment_id}",

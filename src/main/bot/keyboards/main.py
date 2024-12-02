@@ -1,3 +1,4 @@
+from aiogram.filters.callback_data import CallbackData
 from aiogram.types import (
     InlineKeyboardMarkup,
     KeyboardButton,
@@ -22,10 +23,14 @@ async def setup_topic_keyboard() -> InlineKeyboardMarkup:
     Клавиатура для выбора темы на втором шаге.
     """
     builder = InlineKeyboardBuilder()
-    builder.button(text="Проявление", callback_data="guide_manifestation")
-    builder.button(text="Финансы", callback_data="guide_finance")
-    builder.button(text="Отношения", callback_data="guide_relationship")
-    builder.button(text="Стиль", callback_data="guide_style")
+    builder.button(text="Гайд Проявление 🕯", callback_data="guide_manifestation")
+    builder.button(text="Гайд Финансы 💸", callback_data="guide_finance")
+    builder.button(text="Гайд Отношения 💖", callback_data="guide_relationship")
+    builder.button(text="Гайд Стиль 🧝‍♀️", callback_data="guide_style")
+    builder.button(
+        text="Гайд Твои сильные стороны - Астропсихология 🌙",
+        callback_data="guide_astropsychology",
+    )
     return builder.adjust(2).as_markup()
 
 
@@ -99,7 +104,7 @@ async def setup_reply_session_keyboard() -> ReplyKeyboardMarkup:
     Создание основной клавиатуры бота (ReplyKeyboardMarkup).
     """
     keyboard_buttons = [
-        [KeyboardButton(text="👸Women's Club")],
+        # [KeyboardButton(text="👸Women's Club")],   #TODO uncomment after realization
         [
             KeyboardButton(text="🌙Натальная карта"),
             KeyboardButton(text="✨Матрица судьбы"),
@@ -125,7 +130,7 @@ async def setup_prepayment_keyboard() -> InlineKeyboardMarkup:
     return builder.adjust(1).as_markup()
 
 
-async def setup_payment_keyboard(
+async def setup_base_payment_keyboard(
     payment_url: str, payment_id: str
 ) -> InlineKeyboardMarkup:
     """
@@ -135,6 +140,29 @@ async def setup_payment_keyboard(
     builder.button(text="Оплатить 💸", url=payment_url)
     builder.button(text="Проверить оплату ✔️", callback_data=f"check_{payment_id}")
     return builder.adjust(1).as_markup()
+
+
+class PaymentCallbackData(CallbackData, prefix="payment"):
+    action: str
+    payment_id: str
+
+
+# Set up the keyboard
+async def setup_membership_payment_keyboard(payment_id: str) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(
+        text="Оплатить 💸",
+        callback_data=PaymentCallbackData(action="pay", payment_id=payment_id),
+    )
+    builder.button(
+        text="Отменить подписку",
+        callback_data=PaymentCallbackData(action="cancel", payment_id=payment_id),
+    )
+    builder.button(
+        text="Проверить оплату ✔️",
+        callback_data=PaymentCallbackData(action="check", payment_id=payment_id),
+    )
+    return builder.adjust(2).as_markup()
 
 
 async def setup_check_payment_keyboard(payment_id: str) -> InlineKeyboardMarkup:
