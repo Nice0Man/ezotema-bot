@@ -74,10 +74,11 @@ async def send_media_group(message: Message, category: str):
 
 async def handle_payment_offer(message: Message, state: FSMContext, user: UserBase):
     data = await state.get_data()
+    current_category = DATA_CATEGORIES[data["current_service"]]
     if not user.email:
         await message.answer(
             text=render_template(
-                "10_step.html", settings.bot.price_list_dict[data["current_service"]]
+                "10_step.html", settings.bot.price_list_dict[current_category]
             ),
             reply_markup=await setup_prepayment_keyboard(),
             parse_mode="HTML",
