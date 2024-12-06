@@ -6,7 +6,7 @@
   </component>
   <component name="DBNavigator.Project.DataEditorManager">
     <record-view-column-sorting-type value="BY_INDEX" />
-    <value-preview-text-wrapping value="true" />
+    <value-preview-text-wrapping value="false" />
     <value-preview-pinned value="false" />
   </component>
   <component name="DBNavigator.Project.DatabaseBrowserManager">
@@ -17,7 +17,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="169b92a1-610c-419c-b0aa-19030ff48e65">
-      <console name="Users" type="STANDARD" schema="" session="Main"><![CDATA[DELETE FROM users]]></console>
+      <console name="Users" type="STANDARD" schema="main" session="Main"><![CDATA[DELETE FROM users WHERE id = 766776453;]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
