@@ -33,6 +33,12 @@ class APIConfig(BaseModel):
     url: str
 
 
+class SkipConfig(BaseModel):
+    S1: int = 1
+    S5: int = 5
+    S10: int = 10
+
+
 class DatabaseConfig(BaseModel):
     name: str
     password: str
@@ -86,6 +92,7 @@ class Settings(BaseSettings):
     db: DatabaseConfig
     bot: BotConfig
     api: APIConfig
+    skip: SkipConfig = SkipConfig()
     # logging: Logging
 
 

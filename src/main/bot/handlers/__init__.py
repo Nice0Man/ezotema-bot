@@ -7,8 +7,7 @@ def setup(dp: Dispatcher):
     :param dp: A `Dispatcher` instance
     """
     from .commands import router as commands_router
-    from .step_1 import router as step_1_router
-    from .step_2 import router as step_2_router
+    from .step_1_2 import router as step_1_router
     from .step_3 import router as step_3_router
     from .step_4 import router as step_4_router
     from .step_5 import router as step_5_router
@@ -20,7 +19,6 @@ def setup(dp: Dispatcher):
 
     dp.include_router(commands_router)
     dp.include_router(step_1_router)
-    dp.include_router(step_2_router)
     dp.include_router(step_3_router)
     dp.include_router(step_4_router)
     dp.include_router(step_5_router)
