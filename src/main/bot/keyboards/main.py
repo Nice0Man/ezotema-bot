@@ -3,6 +3,7 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
+    InlineKeyboardButton,
 )
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -17,21 +18,75 @@ async def setup_start_keyboard() -> InlineKeyboardMarkup:
     return builder.adjust(1).as_markup()
 
 
+#     """
+#     Клавиатура для выбора темы на втором шаге.
+#     """
+#     builder = InlineKeyboardBuilder()
+#     builder.button(
+#         text="Гайд Карта Желаний 🧡",
+#         callback_data="guide_wish_card",
+#     )
+#     builder.button(
+#         text="Гайд Проявление 🕯",
+#         callback_data="guide_manifestation",
+#     )
+#     builder.button(
+#         text="Гайд Финансы 💸",
+#         callback_data="guide_finance",
+#     )
+#     builder.button(
+#         text="Гайд Отношения 💖",
+#         callback_data="guide_relationship",
+#     )
+#     builder.button(
+#         text="Гайд Стиль 🧝‍♀️",
+#         callback_data="guide_style",
+#     )
+#     builder.button(
+#         text="Гайд Твои сильные стороны - Астропсихология 🌙",
+#         callback_data="guide_astropsychology",
+#     )
+#     return builder.adjust(1).as_markup()
+
+
 # Клавиатура для 2-го шага (выбор темы)
 async def setup_topic_keyboard() -> InlineKeyboardMarkup:
-    """
-    Клавиатура для выбора темы на втором шаге.
-    """
-    builder = InlineKeyboardBuilder()
-    builder.button(text="Гайд Проявление 🕯", callback_data="guide_manifestation")
-    builder.button(text="Гайд Финансы 💸", callback_data="guide_finance")
-    builder.button(text="Гайд Отношения 💖", callback_data="guide_relationship")
-    builder.button(text="Гайд Стиль 🧝‍♀️", callback_data="guide_style")
-    builder.button(
-        text="Гайд Твои сильные стороны - Астропсихология 🌙",
-        callback_data="guide_astropsychology",
-    )
-    return builder.adjust(2).as_markup()
+    keyboard_buttons = [
+        [
+            InlineKeyboardButton(
+                text="Гайд Карта Желаний 🧡",
+                callback_data="guide_wish_card",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="Гайд Проявление 🕯",
+                callback_data="guide_manifestation",
+            ),
+            InlineKeyboardButton(
+                text="Гайд Финансы 💸",
+                callback_data="guide_finance",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="Гайд Отношения 💖",
+                callback_data="guide_relationship",
+            ),
+            InlineKeyboardButton(
+                text="Гайд Стиль 🧝‍♀️",
+                callback_data="guide_style",
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                text="Гайд Твои сильные стороны - Астропсихология 🌙",
+                callback_data="guide_astropsychology",
+            )
+        ],
+    ]
+    keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
+    return keyboard
 
 
 # Клавиатура для 3-го шага (подписка на канал)

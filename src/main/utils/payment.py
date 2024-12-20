@@ -17,6 +17,7 @@ RELATIONSHIP_ANALYSIS = "💞Отношения (ПОЛНЫЙ гайд)"
 ONE_POSITION_ANALYSIS = "🌟Разбор одного положения"
 CHILDREN_MATRIX = "🐱Детская матрица"
 COMPATIBILITY = "💍Совместимость"
+WISH_CARD = "🧡Гайд Карта Желаний "
 
 EZOTEMA_ERROR_MESSAGE = (
     "Ошибка оплаты или срок действия ссылки истек. Попробуйте снова или обратитесь к "
@@ -33,6 +34,7 @@ DATA_CATEGORIES: dict = {
     ONE_POSITION_ANALYSIS: "one_position_analysis",
     CHILDREN_MATRIX: "children_matrix",
     COMPATIBILITY: "compatibility",
+    WISH_CARD: "wish_card",
 }
 
 

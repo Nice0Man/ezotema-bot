@@ -23,5 +23,10 @@
     "img_path": "src/resources/images/4.jpg",
     "name": "Твоим Сильным Сторонам",
     "url": "https://drive.google.com/file/d/1TJdnqLEqTUheaw2YDma6GHRzHu1Q1z6h/view?usp=drivesdk"
+  },
+  "guide_wish_card":{
+    "img_path": "src/resources/images/4.jpg",
+    "name": "Твоей Карте Желаний",
+    "url": "https://drive.google.com/file/d/1iP9mWaCIHrOrJLmmdSYOXVnVhb9PnxyI/view?usp=sharing"
   }
 }
